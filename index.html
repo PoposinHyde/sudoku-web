@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jugar Sudoku Online Gratis | Sudoku Diario y Difícil</title>
+<meta name="description" content="Juega Sudoku online gratis sin registro. Niveles fácil, medio y difícil. Sudoku diario, modo contrarreloj y pistas ilimitadas.">
+<meta name="keywords" content="sudoku online, jugar sudoku gratis, sudoku difícil, sudoku diario, sudoku sin registro">
+<meta name="robots" content="index, follow">
+
+<!-- Google AdSense Script -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=TU_ADSENSE_ID"
+     crossorigin="anonymous"></script>
+
+<style>
+body{
+  margin:0; padding:20px;
+  font-family:'Segoe UI', sans-serif;
+  display:flex; flex-direction:column; align-items:center;
+  background: linear-gradient(-45deg,#4facfe,#00f2fe,#43e97b,#fa709a);
+  background-size:400% 400%;
+  animation:gradientMove 15s ease infinite;
+}
+@keyframes gradientMove{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+h1{ font-size:2.5rem; color:white; text-shadow:0 2px 8px rgba(0,0,0,0.4); margin-bottom:10px;}
+table{ border-collapse:collapse; margin-top:20px; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border-radius:12px; overflow:hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.2);}
+td{border:1px solid rgba(255,255,255,0.6);}
+td input{width:100%; height:100%; font-size:22px; text-align:center; border:none; border-radius:8px; background: rgba(255,255,255,0.4); transition:all .2s;}
+td input:focus{outline:none; transform:scale(1.15); background: rgba(255,255,255,0.9);}
+.fixed{background:#222;color:white;}
+button{margin:10px; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; background:#ff7f50; color:white; transition:all .3s;}
+button:hover{transform:scale(1.1); background:#ff6347;}
+#streak, #timer, #level{color:white; font-weight:bold; text-shadow:0 2px 4px rgba(0,0,0,0.3);}
+#topInfo{display:flex; justify-content:space-between; width:500px; max-width:90%; margin-bottom:10px;}
+#difficultySelector{margin-top:20px;}
+.confetti{position:fixed;width:10px;height:10px;top:-10px;animation:fall linear forwards;}
+@keyframes fall{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+#ads-top, #ads-victory{margin:15px auto; display:block; text-align:center;}
+</style>
+</head>
+<body>
+
+<h1>Sudoku Online Gratis</h1>
+
+<!-- Anuncio superior -->
+<div id="ads-top">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="TU_ADSENSE_ID"
+       data-ad-slot="TU_AD_SLOT"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<!-- Selector de dificultad -->
+<div id="difficultySelector" style="text-align:center;">
+  <label for="difficulty">Elige dificultad:</label>
+  <select id="difficulty">
+    <option value="easy" selected>Fácil</option>
+    <option value="medium">Medio</option>
+    <option value="hard">Difícil</option>
+  </select>
+  <button onclick="startGame()">Jugar</button>
+</div>
+
+<div id="topInfo">
+  <div id="streak">🔥 Racha: 0</div>
+  <div id="timer">⏱ 00:00</div>
+  <div id="level">Nivel: Fácil</div>
+</div>
+
+<table id="grid"></table>
+
+<div>
+  <button onclick="check()">Verificar</button>
+  <button onclick="solveBoard()">Resolver</button>
+  <button onclick="giveHint()">Pista</button>
+</div>
+
+<audio id="winSound" src="https://actions.google.com/sounds/v1/cartoon/concussive_hit_guitar_boing.ogg"></audio>
+
+<script>
+const SIZE=9;
+let solution=[];
+let timerInterval;
+let seconds=0;
+let currentDifficulty="easy";
+let hintsUsed=0;
+const maxHints=3;
+
+// --- Sudoku Diario ---
+function getDailySeed(){ const today=new Date(); return today.getFullYear().toString()+(today.getMonth()+1).toString()+today.getDate().toString(); }
+function seededRandom(seed){ let x = Math.sin(seed)*10000; return x - Math.floor(x); }
+
+// --- Sudoku Generator ---
+function isSafe(board,row,col,num){
+  for(let x=0;x<SIZE;x++) if(board[row][x]==num||board[x][col]==num) return false;
+  let sr=row-row%3, sc=col-col%3;
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++) if(board[sr+i][sc+j]==num) return false;
+  return true;
+}
+function solve(board){
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      if(board[r][c]==0){
+        for(let n=1;n<=9;n++){
+          if(isSafe(board,r,c,n)){
+            board[r][c]=n;
+            if(solve(board)) return true;
+            board[r][c]=0;
+          }
+        }
+        return false;
+      }
+    }
+  }
+  return true;
+}
+function generateFull(){ let b=Array.from({length:SIZE},()=>Array(SIZE).fill(0)); solve(b); return b; }
+
+// --- Generar Sudoku según dificultad ---
+function startGame(){
+  currentDifficulty = document.getElementById("difficulty").value;
+  document.getElementById("difficultySelector").style.display="none";
+  document.getElementById("level").innerText = "Nivel: " + (currentDifficulty==="easy"?"Fácil":currentDifficulty==="medium"?"Medio":"Difícil");
+  generateSudokuByDifficulty(currentDifficulty);
+  resetTimer();
+  hintsUsed=0;
+}
+
+function generateSudokuByDifficulty(diff){
+  const seed = parseInt(getDailySeed());
+  let board = generateFull();
+  let empties = diff==="easy"?35:diff==="medium"?45:55;
+  let count=0;
+  while(count<empties){
+    let r=Math.floor(seededRandom(seed+count)*9);
+    let c=Math.floor(seededRandom(seed+count+1)*9);
+    if(board[r][c]!==0){ board[r][c]=0; count++; }
+  }
+  solution = JSON.parse(JSON.stringify(generateFull()));
+  draw(board);
+}
+
+// --- Draw & Read ---
+function draw(board){
+  const table=document.getElementById("grid"); table.innerHTML="";
+  for(let r=0;r<9;r++){
+    let tr=document.createElement("tr");
+    for(let c=0;c<9;c++){
+      let td=document.createElement("td");
+      let input=document.createElement("input");
+      if(board[r][c]!=0){ input.value=board[r][c]; input.disabled=true; input.classList.add("fixed"); }
+      input.type="number"; input.min=1; input.max=9;
+      input.addEventListener("input",()=>saveBoard());
+      td.appendChild(input); tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  }
+}
+function readBoard(){ const t=document.getElementById("grid"); let b=[];
+  for(let r=0;r<9;r++){ let row=[]; for(let c=0;c<9;c++){ let val=t.rows[r].cells[c].firstChild.value; row.push(val==""?0:parseInt(val)); } b.push(row); } return b; }
+
+// --- Save & Load ---
+function saveBoard(){ localStorage.setItem("savedBoard", JSON.stringify(readBoard())); }
+function loadBoard(){ const saved = localStorage.getItem("savedBoard"); if(saved) draw(JSON.parse(saved)); }
+
+// --- Check & Solve ---
+function check(){ let b=readBoard(); for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(b[r][c]!=solution[r][c]) return alert("Aún no está correcto 😏"); victory(); }
+function solveBoard(){ draw(solution); }
+
+// --- Hint / Pista ---
+function giveHint(){
+  if(hintsUsed >= maxHints){ alert(`Ya usaste las ${maxHints} pistas disponibles 😏`); return; }
+  hintsUsed++;
+  const board = readBoard();
+  const emptyCells = [];
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(board[r][c]===0) emptyCells.push({r,c});
+  if(emptyCells.length===0){ alert("No quedan celdas vacías 😏"); return; }
+  const idx=Math.floor(Math.random()*emptyCells.length);
+  const {r,c} = emptyCells[idx];
+  const table=document.getElementById("grid");
+  const input=table.rows[r].cells[c].firstChild;
+  input.value=solution[r][c];
+  input.classList.add("fixed");
+  saveBoard();
+
+  // Tooltip recordatorio
+  const tooltip=document.createElement("div");
+  tooltip.innerText="¡Recuerda elegir dificultad para otro Sudoku!";
+  tooltip.style.position="fixed";
+  tooltip.style.top="20px"; tooltip.style.left="50%";
+  tooltip.style.transform="translateX(-50%)";
+  tooltip.style.background="rgba(255,255,255,0.9)";
+  tooltip.style.color="#222"; tooltip.style.padding="10px 20px";
+  tooltip.style.borderRadius="10px"; tooltip.style.boxShadow="0 4px 12px rgba(0,0,0,0.3)";
+  tooltip.style.zIndex=9999; tooltip.style.fontWeight="bold";
+  tooltip.style.opacity=0; tooltip.style.transition="opacity 0.5s, top 0.5s";
+  document.body.appendChild(tooltip);
+  setTimeout(()=>{ tooltip.style.opacity=1; tooltip.style.top="40px"; },10);
+  setTimeout(()=>{ tooltip.style.opacity=0; tooltip.style.top="20px"; },2000);
+  setTimeout(()=>{ tooltip.remove(); },2500);
+}
+
+// --- Timer ---
+function startTimer(){ timerInterval=setInterval(()=>{ seconds++; const m=Math.floor(seconds/60).toString().padStart(2,'0'); const s=(seconds%60).toString().padStart(2,'0'); document.getElementById("timer").innerText=`⏱ ${m}:${s}`; },1000);}
+function resetTimer(){ clearInterval(timerInterval); seconds=0; startTimer(); }
+
+// --- Streak ---
+function getYesterday(){ const d=new Date(); d.setDate(d.getDate()-1); return d.getFullYear().toString()+(d.getMonth()+1).toString()+(d.getDate()).toString(); }
+function updateStreak(){ const today=getDailySeed(); const lastDay=localStorage.getItem("lastPlayed"); let streak=parseInt(localStorage.getItem("streak"))||0; if(lastDay===today) return; if(lastDay===getYesterday()) streak++; else streak=1; localStorage.setItem("streak",streak); localStorage.setItem("lastPlayed",today); document.getElementById("streak").innerText="🔥 Racha: "+streak; }
+
+// --- Confetti ---
+function createConfetti(){ const c=document.createElement("div"); c.className="confetti"; c.style.left=Math.random()*100+"vw"; c.style.background=`hsl(${Math.random()*360},100%,50%)`; c.style.animationDuration=(Math.random()*3+2)+"s"; document.body.appendChild(c); setTimeout(()=>c.remove(),5000); }
+
+// --- Victory ---
+function victory(){
+  updateStreak();
+  document.getElementById("winSound").play();
+  for(let i=0;i<200;i++) createConfetti();
+
+  const overlay=document.createElement("div");
+  overlay.style.position="fixed"; overlay.style.top=0; overlay.style.left=0;
+  overlay.style.width="100%"; overlay.style.height="100%";
+  overlay.style.background="rgba(0,0,0,0.8)";
+  overlay.style.display="flex"; overlay.style.flexDirection="column";
+  overlay.style.alignItems="center"; overlay.style.justifyContent="center";
+  overlay.style.color="white"; overlay.style.padding="20px"; overlay.style.boxSizing="border-box";
+
+  overlay.innerHTML=`
+    <h2>🎉 ¡Sudoku Completado!</h2>
+    <p>🔥 ${localStorage.getItem("streak")} días seguidos</p>
+    <div id="ads-victory">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="TU_ADSENSE_ID"
+           data-ad-slot="TU_AD_SLOT"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+    </div>
+    <p style="margin-top:10px; font-size:1.1rem;">Selecciona dificultad para jugar otro Sudoku o usa una pista si estás atascado 🕹️</p>
+    <button onclick="showDifficultySelector()">Elegir dificultad</button>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function showDifficultySelector(){
+  document.getElementById("difficultySelector").style.display="block";
+  const overlay=document.querySelector("div[style*='fixed']");
+  if(overlay) overlay.remove();
+}
+
+// --- Init ---
+loadBoard();
+updateStreak();
+</script>
+</body>
+</html>
