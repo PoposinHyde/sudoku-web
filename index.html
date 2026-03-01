@@ -3,262 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jugar Sudoku Online Gratis | Sudoku Diario y Difícil</title>
-<meta name="description" content="Juega Sudoku online gratis sin registro. Niveles fácil, medio y difícil. Sudoku diario, modo contrarreloj y pistas ilimitadas.">
-<meta name="keywords" content="sudoku online, jugar sudoku gratis, sudoku difícil, sudoku diario, sudoku sin registro">
-<meta name="robots" content="index, follow">
-
-<!-- Google AdSense Script -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=TU_ADSENSE_ID"
-     crossorigin="anonymous"></script>
+<title>Sudoku Pro WebApp</title>
 
 <style>
-body{
-  margin:0; padding:20px;
-  font-family:'Segoe UI', sans-serif;
-  display:flex; flex-direction:column; align-items:center;
-  background: linear-gradient(-45deg,#4facfe,#00f2fe,#43e97b,#fa709a);
-  background-size:400% 400%;
-  animation:gradientMove 15s ease infinite;
+:root {
+  --bg: #111827; --panel: #1f2937; --cell: #374151; --text: #f9fafb;
+  --accent: #3b82f6; --error: #ef4444; --border: #4b5563;
 }
-@keyframes gradientMove{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
+body.light {
+  --bg: #f3f4f6; --panel: #ffffff; --cell: #e5e7eb; --text: #111827;
+  --accent: #2563eb; --error: #dc2626; --border: #9ca3af;
 }
-h1{ font-size:2.5rem; color:white; text-shadow:0 2px 8px rgba(0,0,0,0.4); margin-bottom:10px;}
-table{ border-collapse:collapse; margin-top:20px; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border-radius:12px; overflow:hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.2);}
-td{border:1px solid rgba(255,255,255,0.6);}
-td input{width:100%; height:100%; font-size:22px; text-align:center; border:none; border-radius:8px; background: rgba(255,255,255,0.4); transition:all .2s;}
-td input:focus{outline:none; transform:scale(1.15); background: rgba(255,255,255,0.9);}
-.fixed{background:#222;color:white;}
-button{margin:10px; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; background:#ff7f50; color:white; transition:all .3s;}
-button:hover{transform:scale(1.1); background:#ff6347;}
-#streak, #timer, #level{color:white; font-weight:bold; text-shadow:0 2px 4px rgba(0,0,0,0.3);}
-#topInfo{display:flex; justify-content:space-between; width:500px; max-width:90%; margin-bottom:10px;}
-#difficultySelector{margin-top:20px;}
-.confetti{position:fixed;width:10px;height:10px;top:-10px;animation:fall linear forwards;}
-@keyframes fall{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
-#ads-top, #ads-victory{margin:15px auto; display:block; text-align:center;}
+body { margin:0; font-family:'Segoe UI',system-ui,sans-serif;
+  background:var(--bg); color:var(--text); display:flex; flex-direction:column; align-items:center;
+}
+h1 { margin-top:25px; font-weight:600; letter-spacing:1px; }
+.controls { margin:20px 0; display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+button, select { padding:10px 16px; border-radius:8px; border:none; font-weight:600; cursor:pointer; transition: all 0.2s ease; }
+button { background:var(--accent); color:white; } button:hover { transform:translateY(-2px); opacity:0.9; }
+select { background:var(--panel); color:var(--text); border:1px solid var(--border); }
+#sudoku-grid { display:grid; grid-template-columns:repeat(9,1fr); grid-template-rows:repeat(9,1fr);
+  width:100%; max-width:520px; aspect-ratio:1/1; background:var(--border); border-radius:12px;
+  overflow:hidden; box-shadow:0 15px 30px rgba(0,0,0,0.3); animation:fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:scale(0.98);} to{opacity:1;transform:scale(1);} }
+.cell { position:relative; background:var(--cell); border:1px solid var(--border); }
+.cell .main-num { width:100%; height:100%; text-align:center; font-size:1.6rem; border:none; outline:none; background:transparent; color:var(--text); font-weight:600; }
+.cell .main-num:disabled { color:var(--accent); font-weight:700; }
+.cell .main-num.error { background:var(--error); color:white; }
+.cell .notes { display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
+  position:absolute; top:2px; left:2px; right:2px; bottom:2px; font-size:0.6rem; color:var(--text); pointer-events:none; }
+.stats { margin:18px; font-weight:500; }
+#ad-banner { margin:25px; padding:18px; background:var(--panel); width:100%; max-width:520px; text-align:center; border-radius:10px; border:1px dashed var(--border); }
+#timer { margin:12px; font-weight:600; font-size:1.1rem; }
+.cell:nth-child(3n) { border-right:3px solid var(--accent); }
+.cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom:3px solid var(--accent); }
+#num-pad { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; max-width:520px; margin-bottom:20px; }
+#num-pad button { padding:12px 0; font-size:1.2rem; border-radius:8px; background:var(--accent); color:white; border:none; }
+#num-pad button:active { transform: scale(0.95); }
 </style>
 </head>
+
 <body>
+<h1>Sudoku Pro</h1>
 
-<h1>Sudoku Online Gratis</h1>
+<div class="controls">
+  <select id="difficulty">
+    <option value="facil">Fácil</option>
+    <option value="medio">Medio</option>
+    <option value="dificil">Difícil</option>
+  </select>
+  <button onclick="newGame()">Nuevo</button>
+  <button onclick="resetGame()">Reiniciar</button>
+  <button onclick="toggleTheme()">Modo Claro/Oscuro</button>
+  <button onclick="toggleNoteMode()">Modo Notas</button>
+</div>
 
-<!-- Anuncio superior -->
-<div id="ads-top">
+<div id="sudoku-grid"></div>
+
+<div id="num-pad">
+  <button onclick="insertNumber(1)">1</button>
+  <button onclick="insertNumber(2)">2</button>
+  <button onclick="insertNumber(3)">3</button>
+  <button onclick="insertNumber(4)">4</button>
+  <button onclick="insertNumber(5)">5</button>
+  <button onclick="insertNumber(6)">6</button>
+  <button onclick="insertNumber(7)">7</button>
+  <button onclick="insertNumber(8)">8</button>
+  <button onclick="insertNumber(9)">9</button>
+  <button onclick="insertNumber(0)">Borrar</button>
+</div>
+
+<div id="timer">Tiempo: 00:00</div>
+<div class="stats"><span id="filledCount">Celdas llenas: 0</span></div>
+
+<!-- Banner monetización responsive -->
+<div id="ad-banner" style="width:100%; max-width:520px; margin:25px auto; text-align:center;">
   <ins class="adsbygoogle"
        style="display:block"
-       data-ad-client="TU_ADSENSE_ID"
-       data-ad-slot="TU_AD_SLOT"
+       data-ad-client="ca-pub-XXXXXXXXXXXX"  <!-- Reemplaza con tu ID -->
+       data-ad-slot="YYYYYYYYYY"            <!-- Reemplaza con tu slot -->
        data-ad-format="auto"
        data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  <script>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
 </div>
-
-<!-- Selector de dificultad -->
-<div id="difficultySelector" style="text-align:center;">
-  <label for="difficulty">Elige dificultad:</label>
-  <select id="difficulty">
-    <option value="easy" selected>Fácil</option>
-    <option value="medium">Medio</option>
-    <option value="hard">Difícil</option>
-  </select>
-  <button onclick="startGame()">Jugar</button>
-</div>
-
-<div id="topInfo">
-  <div id="streak">🔥 Racha: 0</div>
-  <div id="timer">⏱ 00:00</div>
-  <div id="level">Nivel: Fácil</div>
-</div>
-
-<table id="grid"></table>
-
-<div>
-  <button onclick="check()">Verificar</button>
-  <button onclick="solveBoard()">Resolver</button>
-  <button onclick="giveHint()">Pista</button>
-</div>
-
-<audio id="winSound" src="https://actions.google.com/sounds/v1/cartoon/concussive_hit_guitar_boing.ogg"></audio>
 
 <script>
-const SIZE=9;
-let solution=[];
-let timerInterval;
-let seconds=0;
-let currentDifficulty="easy";
-let hintsUsed=0;
-const maxHints=3;
+// ---------- Variables ----------
+let solution=[], puzzle=[], startTime, timerInterval, selectedInput=null, noteMode=false;
 
-// --- Sudoku Diario ---
-function getDailySeed(){ const today=new Date(); return today.getFullYear().toString()+(today.getMonth()+1).toString()+today.getDate().toString(); }
-function seededRandom(seed){ let x = Math.sin(seed)*10000; return x - Math.floor(x); }
-
-// --- Sudoku Generator ---
-function isSafe(board,row,col,num){
-  for(let x=0;x<SIZE;x++) if(board[row][x]==num||board[x][col]==num) return false;
-  let sr=row-row%3, sc=col-col%3;
-  for(let i=0;i<3;i++) for(let j=0;j<3;j++) if(board[sr+i][sc+j]==num) return false;
-  return true;
-}
-function solve(board){
-  for(let r=0;r<SIZE;r++){
-    for(let c=0;c<SIZE;c++){
-      if(board[r][c]==0){
-        for(let n=1;n<=9;n++){
-          if(isSafe(board,r,c,n)){
-            board[r][c]=n;
-            if(solve(board)) return true;
-            board[r][c]=0;
-          }
+// ---------- Generador tablero ----------
+function generateSolvedBoard(){
+  const board=Array.from({length:9},()=>Array(9).fill(0));
+  function isValid(board,r,c,n){
+    for(let i=0;i<9;i++){ if(board[r][i]===n||board[i][c]===n) return false; }
+    const sr=Math.floor(r/3)*3, sc=Math.floor(c/3)*3;
+    for(let rr=sr;rr<sr+3;rr++) for(let cc=sc;cc<sc+3;cc++) if(board[rr][cc]===n) return false;
+    return true;
+  }
+  function fillBoard(){
+    for(let r=0;r<9;r++){
+      for(let c=0;c<9;c++){
+        if(board[r][c]===0){
+          const nums=shuffle([1,2,3,4,5,6,7,8,9]);
+          for(let n of nums){ if(isValid(board,r,c,n)){ board[r][c]=n; if(fillBoard()) return true; board[r][c]=0; } }
+          return false;
         }
-        return false;
       }
     }
+    return true;
   }
-  return true;
-}
-function generateFull(){ let b=Array.from({length:SIZE},()=>Array(SIZE).fill(0)); solve(b); return b; }
-
-// --- Generar Sudoku según dificultad ---
-function startGame(){
-  currentDifficulty = document.getElementById("difficulty").value;
-  document.getElementById("difficultySelector").style.display="none";
-  document.getElementById("level").innerText = "Nivel: " + (currentDifficulty==="easy"?"Fácil":currentDifficulty==="medium"?"Medio":"Difícil");
-  generateSudokuByDifficulty(currentDifficulty);
-  resetTimer();
-  hintsUsed=0;
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  fillBoard(); return board;
 }
 
-function generateSudokuByDifficulty(diff){
-  const seed = parseInt(getDailySeed());
-  let board = generateFull();
-  let empties = diff==="easy"?35:diff==="medium"?45:55;
-  let count=0;
-  while(count<empties){
-    let r=Math.floor(seededRandom(seed+count)*9);
-    let c=Math.floor(seededRandom(seed+count+1)*9);
-    if(board[r][c]!==0){ board[r][c]=0; count++; }
+// ---------- Crear puzzle ----------
+function getCellsToRemove(diff){ switch(diff){ case "facil": return 35; case "medio": return 45; case "dificil": return 55; default: return 45; } }
+function createPuzzle(board,diff){
+  let puzzle=board.map(r=>[...r]);
+  let cellsToRemove=getCellsToRemove(diff);
+  const positions=[];
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++) positions.push([r,c]);
+  shuffle(positions);
+  for(let [r,c] of positions){
+    if(cellsToRemove<=0) break;
+    const temp=puzzle[r][c]; puzzle[r][c]=0;
+    puzzle[r][c]===0?cellsToRemove--:puzzle[r][c]=temp;
   }
-  solution = JSON.parse(JSON.stringify(generateFull()));
-  draw(board);
+  return puzzle;
 }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
-// --- Draw & Read ---
-function draw(board){
-  const table=document.getElementById("grid"); table.innerHTML="";
+// ---------- Dibujar tablero ----------
+function drawBoard(fixedCells){
+  const grid=document.getElementById("sudoku-grid"); grid.innerHTML="";
   for(let r=0;r<9;r++){
-    let tr=document.createElement("tr");
     for(let c=0;c<9;c++){
-      let td=document.createElement("td");
-      let input=document.createElement("input");
-      if(board[r][c]!=0){ input.value=board[r][c]; input.disabled=true; input.classList.add("fixed"); }
-      input.type="number"; input.min=1; input.max=9;
-      input.addEventListener("input",()=>saveBoard());
-      td.appendChild(input); tr.appendChild(td);
+      const cell=document.createElement("div"); cell.classList.add("cell");
+      const input=document.createElement("input");
+      input.classList.add("main-num"); input.maxLength=1;
+
+      if(fixedCells && fixedCells[r*9+c]){
+        input.value = puzzle[r][c]; // asignar valor inicial
+        input.disabled=true;
+      } else { input.value=''; input.disabled=false; }
+
+      const notes=document.createElement("div"); notes.classList.add("notes");
+      cell.appendChild(input); cell.appendChild(notes);
+
+      input.addEventListener("input",()=>{
+        input.value=input.value.replace(/[^1-9]/g,"");
+        if(input.value && parseInt(input.value)!==solution[r][c]) input.classList.add("error");
+        else input.classList.remove("error");
+        notes.dataset.nums=''; notes.innerHTML='';
+        updateStats(); checkCompletion(); saveProgress();
+      });
+
+      grid.appendChild(cell);
     }
-    table.appendChild(tr);
   }
-}
-function readBoard(){ const t=document.getElementById("grid"); let b=[];
-  for(let r=0;r<9;r++){ let row=[]; for(let c=0;c<9;c++){ let val=t.rows[r].cells[c].firstChild.value; row.push(val==""?0:parseInt(val)); } b.push(row); } return b; }
-
-// --- Save & Load ---
-function saveBoard(){ localStorage.setItem("savedBoard", JSON.stringify(readBoard())); }
-function loadBoard(){ const saved = localStorage.getItem("savedBoard"); if(saved) draw(JSON.parse(saved)); }
-
-// --- Check & Solve ---
-function check(){ let b=readBoard(); for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(b[r][c]!=solution[r][c]) return alert("Aún no está correcto 😏"); victory(); }
-function solveBoard(){ draw(solution); }
-
-// --- Hint / Pista ---
-function giveHint(){
-  if(hintsUsed >= maxHints){ alert(`Ya usaste las ${maxHints} pistas disponibles 😏`); return; }
-  hintsUsed++;
-  const board = readBoard();
-  const emptyCells = [];
-  for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(board[r][c]===0) emptyCells.push({r,c});
-  if(emptyCells.length===0){ alert("No quedan celdas vacías 😏"); return; }
-  const idx=Math.floor(Math.random()*emptyCells.length);
-  const {r,c} = emptyCells[idx];
-  const table=document.getElementById("grid");
-  const input=table.rows[r].cells[c].firstChild;
-  input.value=solution[r][c];
-  input.classList.add("fixed");
-  saveBoard();
-
-  // Tooltip recordatorio
-  const tooltip=document.createElement("div");
-  tooltip.innerText="¡Recuerda elegir dificultad para otro Sudoku!";
-  tooltip.style.position="fixed";
-  tooltip.style.top="20px"; tooltip.style.left="50%";
-  tooltip.style.transform="translateX(-50%)";
-  tooltip.style.background="rgba(255,255,255,0.9)";
-  tooltip.style.color="#222"; tooltip.style.padding="10px 20px";
-  tooltip.style.borderRadius="10px"; tooltip.style.boxShadow="0 4px 12px rgba(0,0,0,0.3)";
-  tooltip.style.zIndex=9999; tooltip.style.fontWeight="bold";
-  tooltip.style.opacity=0; tooltip.style.transition="opacity 0.5s, top 0.5s";
-  document.body.appendChild(tooltip);
-  setTimeout(()=>{ tooltip.style.opacity=1; tooltip.style.top="40px"; },10);
-  setTimeout(()=>{ tooltip.style.opacity=0; tooltip.style.top="20px"; },2000);
-  setTimeout(()=>{ tooltip.remove(); },2500);
+  updateStats();
 }
 
-// --- Timer ---
-function startTimer(){ timerInterval=setInterval(()=>{ seconds++; const m=Math.floor(seconds/60).toString().padStart(2,'0'); const s=(seconds%60).toString().padStart(2,'0'); document.getElementById("timer").innerText=`⏱ ${m}:${s}`; },1000);}
-function resetTimer(){ clearInterval(timerInterval); seconds=0; startTimer(); }
-
-// --- Streak ---
-function getYesterday(){ const d=new Date(); d.setDate(d.getDate()-1); return d.getFullYear().toString()+(d.getMonth()+1).toString()+(d.getDate()).toString(); }
-function updateStreak(){ const today=getDailySeed(); const lastDay=localStorage.getItem("lastPlayed"); let streak=parseInt(localStorage.getItem("streak"))||0; if(lastDay===today) return; if(lastDay===getYesterday()) streak++; else streak=1; localStorage.setItem("streak",streak); localStorage.setItem("lastPlayed",today); document.getElementById("streak").innerText="🔥 Racha: "+streak; }
-
-// --- Confetti ---
-function createConfetti(){ const c=document.createElement("div"); c.className="confetti"; c.style.left=Math.random()*100+"vw"; c.style.background=`hsl(${Math.random()*360},100%,50%)`; c.style.animationDuration=(Math.random()*3+2)+"s"; document.body.appendChild(c); setTimeout(()=>c.remove(),5000); }
-
-// --- Victory ---
-function victory(){
-  updateStreak();
-  document.getElementById("winSound").play();
-  for(let i=0;i<200;i++) createConfetti();
-
-  const overlay=document.createElement("div");
-  overlay.style.position="fixed"; overlay.style.top=0; overlay.style.left=0;
-  overlay.style.width="100%"; overlay.style.height="100%";
-  overlay.style.background="rgba(0,0,0,0.8)";
-  overlay.style.display="flex"; overlay.style.flexDirection="column";
-  overlay.style.alignItems="center"; overlay.style.justifyContent="center";
-  overlay.style.color="white"; overlay.style.padding="20px"; overlay.style.boxSizing="border-box";
-
-  overlay.innerHTML=`
-    <h2>🎉 ¡Sudoku Completado!</h2>
-    <p>🔥 ${localStorage.getItem("streak")} días seguidos</p>
-    <div id="ads-victory">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="TU_ADSENSE_ID"
-           data-ad-slot="TU_AD_SLOT"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
-    </div>
-    <p style="margin-top:10px; font-size:1.1rem;">Selecciona dificultad para jugar otro Sudoku o usa una pista si estás atascado 🕹️</p>
-    <button onclick="showDifficultySelector()">Elegir dificultad</button>
-  `;
-  document.body.appendChild(overlay);
+// ---------- Estadísticas ----------
+function updateStats(){
+  const inputs=document.querySelectorAll("#sudoku-grid input");
+  let filled=0; inputs.forEach(i=>{ if(i.value) filled++; });
+  document.getElementById("filledCount").textContent="Celdas llenas: "+filled;
 }
 
-function showDifficultySelector(){
-  document.getElementById("difficultySelector").style.display="block";
-  const overlay=document.querySelector("div[style*='fixed']");
-  if(overlay) overlay.remove();
+// ---------- Temporizador ----------
+function startTimer(){ clearInterval(timerInterval); timerInterval=setInterval(updateTimer,1000); }
+function updateTimer(){ if(!startTime) return; const elapsed=Math.floor((Date.now()-startTime)/1000); const m=String(Math.floor(elapsed/60)).padStart(2,'0'); const s=String(elapsed%60).padStart(2,'0'); document.getElementById("timer").textContent=`Tiempo: ${m}:${s}`; }
+
+// ---------- Controles ----------
+function newGame(){ 
+  const diff=document.getElementById("difficulty").value; 
+  solution=generateSolvedBoard(); 
+  puzzle=createPuzzle(solution,diff); 
+  const fixedCells=puzzle.flat().map(v=>v!==0); 
+  drawBoard(fixedCells); 
+  startTime=Date.now(); startTimer(); saveProgress(); 
+}
+function resetGame(){ 
+  const fixedCells=puzzle.flat().map(v=>v!==0); 
+  drawBoard(fixedCells); 
+  startTime=Date.now(); startTimer(); 
+  saveProgress(); 
+}
+function toggleTheme(){ document.body.classList.toggle("light"); }
+function toggleNoteMode(){ noteMode=!noteMode; alert(noteMode ? "Modo Notas activado" : "Modo Notas desactivado"); }
+
+// ---------- Teclado flotante ----------
+document.addEventListener('click',e=>{ if(e.target.tagName==='INPUT'&&!e.target.disabled) selectedInput=e.target; });
+function insertNumber(num){
+  if(!selectedInput) return;
+  const cellDiv=selectedInput.parentElement;
+  const notesDiv=cellDiv.querySelector('.notes');
+  if(noteMode){
+    if(!notesDiv.dataset.nums) notesDiv.dataset.nums='';
+    let nums=notesDiv.dataset.nums.split('').filter(n=>n);
+    if(nums.includes(String(num))) nums=nums.filter(n=>n!==String(num));
+    else nums.push(String(num));
+    notesDiv.dataset.nums=nums.join('');
+    notesDiv.innerHTML=Array(9).fill(0).map((_,i)=>nums.includes(String(i+1))?i+1:'').join('');
+  } else {
+    selectedInput.value = num===0?'':num;
+    if(selectedInput.value && parseInt(selectedInput.value)!==solution[Math.floor(Array.from(document.querySelectorAll("#sudoku-grid input")).indexOf(selectedInput)/9)][Array.from(document.querySelectorAll("#sudoku-grid input")).indexOf(selectedInput)%9]) selectedInput.classList.add("error");
+    else selectedInput.classList.remove("error");
+    notesDiv.dataset.nums=''; notesDiv.innerHTML='';
+  }
+  updateStats(); checkCompletion(); saveProgress();
 }
 
-// --- Init ---
-loadBoard();
-updateStreak();
+// ---------- Autoguardado ----------
+function saveProgress(){
+  const inputs=document.querySelectorAll("#sudoku-grid input");
+  const progress=[]; const fixedCells=[];
+  inputs.forEach(input=>{
+    const notesDiv=input.parentElement.querySelector('.notes');
+    progress.push({ value: input.value, notes: notesDiv.dataset.nums||'' });
+    fixedCells.push(input.disabled);
+  });
+  const diff=document.getElementById("difficulty").value;
+  const elapsed=Math.floor((Date.now()-startTime)/1000);
+  localStorage.setItem("sudoku-progress",JSON.stringify({ progress, diff, elapsed, solution, fixedCells }));
+}
+
+function loadProgress(){
+  const state=JSON.parse(localStorage.getItem("sudoku-progress"));
+  if(state && state.progress && state.solution){
+    solution=state.solution;
+    puzzle=solution.map(r=>[...r]);
+    const fixedCells=state.fixedCells;
+    drawBoard(fixedCells);
+    const inputs=document.querySelectorAll("#sudoku-grid input");
+    state.progress.forEach((cell,i)=>{
+      const input=inputs[i];
+      const notesDiv=input.parentElement.querySelector('.notes');
+      input.value=cell.value;
+      notesDiv.dataset.nums=cell.notes||'';
+      notesDiv.innerHTML=Array(9).fill(0).map((_,n)=>cell.notes?.includes(String(n+1))?n+1:'').join('');
+      input.disabled=fixedCells[i];
+      if(input.value && parseInt(input.value)!==solution[Math.floor(i/9)][i%9]) input.classList.add("error");
+    });
+    document.getElementById("difficulty").value=state.diff;
+    startTime=Date.now()-state.elapsed*1000;
+    startTimer();
+  } else { newGame(); }
+}
+
+document.getElementById("difficulty").addEventListener("change", saveProgress);
+
+loadProgress();
 </script>
 </body>
 </html>
