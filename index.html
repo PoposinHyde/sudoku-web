@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>El Reto de Mr. Hyde Sudoku: Sudoku Gratis en Español</title>
+<title>Mr. Hyde Sudoku: Edición Ads</title>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 
 <style>
 :root {
@@ -26,7 +28,7 @@ body.sepia {
 body { 
     margin:0; font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); 
     display:flex; flex-direction:column; align-items:center; min-height: 100vh; 
-    padding-bottom: 80px; /* Espacio para el banner inferior */
+    padding-bottom: 80px; /* Espacio de seguridad para el banner */
     transition: 0.3s; overflow-x: hidden;
 }
 
@@ -41,11 +43,9 @@ h1 { margin:15px 0; font-size: 1.2rem; text-align: center; color: var(--accent);
   border-radius:8px; overflow:hidden; position: relative;
 }
 
-/* Celdas y Animaciones */
 .cell { position:relative; background:var(--cell); border:0.5px solid var(--border); }
 .cell.block-shaded { background-color: var(--panel); }
 .cell:nth-child(3n) { border-right: 3px solid var(--border); }
-.cell:nth-child(9n) { border-right: 0.5px solid var(--border); } 
 .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 3px solid var(--border); }
 
 @keyframes success-glow {
@@ -70,18 +70,16 @@ h1 { margin:15px 0; font-size: 1.2rem; text-align: center; color: var(--accent);
 
 .cell .notes-layer { display:grid; grid-template-columns:repeat(3,1fr); position:absolute; inset:0; pointer-events:none; padding: 2px; }
 .cell .notes-layer span { display:flex; align-items:center; justify-content:center; font-size:0.55rem; opacity:0.7; color: var(--text); }
-.cell:has(input:not([value=""])) .notes-layer { display: none; }
 
-/* Controles */
 .controls { margin:10px 0; display:flex; gap:5px; flex-wrap:wrap; justify-content:center; }
 button, select { padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; background: var(--panel); color: var(--text); border: 1px solid var(--border); }
 #note-btn.active { background: var(--success); color: white; }
 
 #num-pad { display: flex; flex-direction: row; justify-content: space-between; width: 95vw; max-width: 480px; margin: 15px 0; gap: 6px; }
-#num-pad button { flex: 1; padding: 15px 0; border-radius: 8px; font-size: 1.2rem; }
+#num-pad button { flex: 1; padding: 15px 0; border-radius: 8px; font-size: 1.2rem; background: var(--panel); color: var(--text); }
 #num-pad button.completed { opacity: 0.2; pointer-events: none; }
 
-/* Modales y Banners */
+/* Capas de Interfaz (Pausa, Revivir, Banner) */
 #pause-screen, #revive-modal {
     position: absolute; inset: 0; background: var(--bg); z-index: 100;
     display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
@@ -93,14 +91,12 @@ button, select { padding: 8px 12px; border-radius: 8px; border: none; font-weigh
     background: var(--panel); border-top: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center; z-index: 1000;
 }
-#ad-placeholder { width: 320px; height: 50px; background: #000; color: #fff; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; }
-.simulated-ad { color: var(--accent); font-weight: bold; text-decoration: underline; cursor: pointer; font-size: 0.85rem; margin-top: 2px; transition: 0.5s; }
+#ad-placeholder { width: 320px; height: 50px; background: #000; border-radius: 4px; overflow: hidden; }
 </style>
 </head>
-
 <body>
 
-<h1>El Reto de Mr. Hyde: Sudoku Gratis en Español</h1>
+<h1>Mr. Hyde Sudoku</h1>
 
 <div class="status-bar">
     <div id="lives-container">❤️❤️❤️</div>
@@ -133,56 +129,53 @@ button, select { padding: 8px 12px; border-radius: 8px; border: none; font-weigh
 <div id="num-pad"></div>
 
 <div id="revive-modal">
-    <h2 style="color:white">¡SIN VIDAS!</h2>
-    <p style="color:var(--text); margin-bottom: 20px;">Mira un video para obtener +1 ❤️<br>y no perder tu progreso.</p>
-    <button onclick="simulateRewardedAd()" style="padding:15px 30px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold;">📺 VER VIDEO</button>
-    <button onclick="newGame()" style="margin-top:20px; background:transparent; color:var(--error); border:none; text-decoration:underline;">No, empezar de nuevo</button>
+    <h2 style="color:white">¡TE HAS QUEDADO SIN VIDAS!</h2>
+    <p style="color:var(--text); margin-bottom: 20px;">Mira un video para obtener +1 ❤️<br>y continuar tu partida.</p>
+    <button id="revive-ad-btn" onclick="showRewardedAd()" style="padding:15px 30px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">📺 VER VIDEO</button>
+    <button onclick="newGame()" style="margin-top:20px; background:transparent; color:var(--error); border:none; text-decoration:underline; cursor:pointer;">No, perder progreso</button>
 </div>
 
 <div id="ad-banner-container">
     <div id="ad-placeholder">
-        <span>PUBLICIDAD</span>
-        <div class="simulated-ad">Cargando...</div>
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:320px;height:50px"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="YYYYYYYYYY"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
 </div>
 
+
+
 <script>
+// --- VARIABLES Y ESTADO ---
 let solution=[], puzzle=[], timerInterval, selectedInput=null, noteMode=false;
 let history = [], lives = 3, hintsRemaining = 3, gameOver = false, totalSeconds = 0, isPaused = false;
 let currentThemeIdx = 0;
 const themes = ['dark', 'light', 'sepia'];
 
-// --- MONETIZACIÓN ---
-function simulateRewardedAd() {
-    const btn = event.target;
-    const originalText = btn.textContent;
+// --- LÓGICA DE MONETIZACIÓN ---
+function showRewardedAd() {
+    const btn = document.getElementById("revive-ad-btn");
     btn.textContent = "Cargando anuncio...";
     btn.disabled = true;
 
+    // SIMULACIÓN: Aquí llamarías a la función de tu proveedor de Rewarded Video
     setTimeout(() => {
-        alert("¡Anuncio visto! Has recuperado 1 vida.");
+        alert("¡Anuncio completado! Vida extra concedida.");
         lives = 1;
         gameOver = false;
         document.getElementById("revive-modal").style.display = "none";
-        btn.textContent = originalText;
+        btn.textContent = "📺 VER VIDEO";
         btn.disabled = false;
         updateStatusUI();
         startTimer(true);
-    }, 3000);
+    }, 3000); 
 }
 
-function refreshBanner() {
-    const ads = ["Sudoku Pro: Sin anuncios", "Entrena tu mente hoy", "Récord: 02:45 ¿puedes superarlo?", "¡Compra la versión Premium!"];
-    const adText = ads[Math.floor(Math.random() * ads.length)];
-    const el = document.querySelector('.simulated-ad');
-    if(el) {
-        el.style.opacity = 0;
-        setTimeout(() => { el.textContent = adText; el.style.opacity = 1; }, 500);
-    }
-}
-setInterval(refreshBanner, 45000);
-
-// --- LÓGICA DE JUEGO ---
+// --- JUEGO ---
 function insertNumber(num, isHint = false){
   if(!selectedInput || selectedInput.disabled || gameOver || isPaused) return;
   const cell = selectedInput.parentElement;
@@ -241,17 +234,8 @@ function checkAreaCompletion(r, c) {
             });
         }
     };
-    checkLine(Array.from({length: 9}, (_, i) => r * 9 + i)); // Fila
-    checkLine(Array.from({length: 9}, (_, i) => i * 9 + c)); // Columna
-}
-
-// --- UTILIDADES ---
-function togglePause() {
-    if (gameOver) return;
-    isPaused = !isPaused;
-    document.getElementById("pause-screen").style.display = isPaused ? "flex" : "none";
-    document.getElementById("pause-btn").textContent = isPaused ? "▶️" : "⏸️";
-    if (isPaused) clearInterval(timerInterval); else startTimer(true);
+    checkLine(Array.from({length: 9}, (_, i) => r * 9 + i));
+    checkLine(Array.from({length: 9}, (_, i) => i * 9 + c));
 }
 
 function updateStatusUI() {
@@ -261,23 +245,7 @@ function updateStatusUI() {
     updateBestTimeDisplay();
 }
 
-function createNumPad() {
-    const pad = document.getElementById("num-pad"); pad.innerHTML = "";
-    const counts = Array(10).fill(0);
-    document.querySelectorAll(".main-num").forEach(i => { if(i.value && !i.classList.contains("error")) counts[i.value]++; });
-    for(let i=1; i<=9; i++) {
-        const btn = document.createElement("button");
-        btn.innerHTML = `${i}<div style="font-size:0.5rem; opacity:0.5">${counts[i]}/9</div>`;
-        if(counts[i] >= 9) btn.classList.add("completed");
-        btn.onclick = () => insertNumber(i);
-        pad.appendChild(btn);
-    }
-    const del = document.createElement("button");
-    del.innerHTML = "⌫"; del.onclick = () => insertNumber(0); del.style.background = "var(--error)"; del.style.color = "white";
-    pad.appendChild(del);
-}
-
-// --- CORE --- (Cargar tablero, solución, etc)
+// --- SISTEMA DE TABLERO Y PERSISTENCIA ---
 function generateSolvedBoard(){
   const board=Array.from({length:9},()=>Array(9).fill(0));
   const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
@@ -325,6 +293,110 @@ function drawBoard(fixedMap){
   createNumPad();
 }
 
+function saveProgress(){
+    if(gameOver) return;
+    const cellsData = Array.from(document.querySelectorAll(".cell")).map(cell => {
+        const input = cell.querySelector('.main-num');
+        const notesLayer = cell.querySelector('.notes-layer');
+        if(!input) return null;
+        return { v: input.value, n: notesLayer.getAttribute('data-notes') || '', d: input.disabled, e: input.classList.contains("error") };
+    }).filter(x => x !== null);
+    localStorage.setItem("hyde_v7_ads", JSON.stringify({ cellsData, solution, puzzle, lives, hintsRemaining, totalSeconds, diff: document.getElementById("difficulty").value }));
+}
+
+function loadProgress(){
+    const saved = localStorage.getItem("hyde_v7_ads");
+    if(!saved) return newGame();
+    const s = JSON.parse(saved);
+    solution = s.solution; puzzle = s.puzzle; lives = s.lives; hintsRemaining = s.hintsRemaining; totalSeconds = s.totalSeconds;
+    document.getElementById("difficulty").value = s.diff;
+    drawBoard(s.cellsData.map(c => c.d));
+    const inputs = document.querySelectorAll(".main-num");
+    const cells = document.querySelectorAll(".cell");
+    s.cellsData.forEach((data, i) => {
+        inputs[i].value = data.v; inputs[i].setAttribute('value', data.v);
+        if(data.e) inputs[i].classList.add("error");
+        if(data.n) {
+            const layer = cells[i].querySelector('.notes-layer');
+            layer.setAttribute('data-notes', data.n);
+            const notesArr = data.n.split(",");
+            layer.querySelectorAll('span').forEach((span, idx) => span.textContent = notesArr.includes(String(idx + 1)) ? (idx + 1) : "");
+        }
+    });
+    updateStatusUI(); startTimer(true); createNumPad();
+}
+
+function newGame(){
+  localStorage.removeItem("hyde_v7_ads");
+  lives = 3; hintsRemaining = 3; gameOver = false; isPaused = false; history = [];
+  document.getElementById("revive-modal").style.display = "none";
+  const diff = document.getElementById("difficulty").value;
+  solution = generateSolvedBoard(); puzzle = createPuzzle(solution, diff);
+  drawBoard(puzzle.flat().map(v => v !== 0));
+  updateStatusUI(); startTimer(); saveProgress();
+}
+
+// --- INTERFAZ ---
+function togglePause() {
+    if (gameOver) return;
+    isPaused = !isPaused;
+    document.getElementById("pause-screen").style.display = isPaused ? "flex" : "none";
+    document.getElementById("pause-btn").textContent = isPaused ? "▶️" : "⏸️";
+    if (isPaused) clearInterval(timerInterval); else startTimer(true);
+}
+
+function updateVisualSelection(target){
+  document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight-area', 'selected', 'same-number'));
+  if(!target) return;
+  const all = Array.from(document.querySelectorAll(".main-num"));
+  const idx = all.indexOf(target);
+  const r=Math.floor(idx/9), c=idx%9;
+  all.forEach((el, i)=>{
+    const ir=Math.floor(i/9), ic=i%9;
+    if(ir===r || ic===c || (Math.floor(ir/3)===Math.floor(r/3) && Math.floor(ic/3)===Math.floor(c/3))) el.parentElement.classList.add('highlight-area');
+    if(el===target) el.parentElement.classList.add('selected');
+    if(target.value && el.value === target.value && el !== target) el.parentElement.classList.add('same-number');
+  });
+}
+
+function toggleTheme(){
+    document.body.classList.remove(...themes);
+    currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+    document.body.classList.add(themes[currentThemeIdx]);
+}
+
+// Se omiten funciones de soporte repetidas para mayor brevedad (undo, createNumPad, etc se mantienen del código anterior)
+function undo() {
+    if (history.length === 0 || gameOver || isPaused) return;
+    const last = history.pop();
+    const cells = document.querySelectorAll(".cell");
+    const target = cells[last.idx].querySelector(".main-num");
+    const layer = cells[last.idx].querySelector(".notes-layer");
+    target.value = last.oldValue; target.setAttribute('value', last.oldValue);
+    layer.setAttribute('data-notes', last.oldNotes);
+    const notesArr = last.oldNotes.split(",");
+    layer.querySelectorAll('span').forEach((s, i) => s.textContent = notesArr.includes(String(i+1)) ? i+1 : '');
+    const r = Math.floor(last.idx/9), c = last.idx%9;
+    target.classList.toggle("error", target.value && parseInt(target.value) !== solution[r][c]);
+    createNumPad(); saveProgress();
+}
+
+function createNumPad() {
+    const pad = document.getElementById("num-pad"); pad.innerHTML = "";
+    const counts = Array(10).fill(0);
+    document.querySelectorAll(".main-num").forEach(i => { if(i.value && !i.classList.contains("error")) counts[i.value]++; });
+    for(let i=1; i<=9; i++) {
+        const btn = document.createElement("button");
+        btn.innerHTML = `${i}<div style="font-size:0.5rem; opacity:0.5">${counts[i]}/9</div>`;
+        if(counts[i] >= 9) btn.classList.add("completed");
+        btn.onclick = () => insertNumber(i);
+        pad.appendChild(btn);
+    }
+    const del = document.createElement("button");
+    del.innerHTML = "⌫"; del.onclick = () => insertNumber(0); del.style.background = "var(--error)"; del.style.color = "white";
+    pad.appendChild(del);
+}
+
 function updateCellNotes(cell, num) {
     const notesLayer = cell.querySelector('.notes-layer');
     let notes = (notesLayer.getAttribute('data-notes') || "").split(",").filter(x => x !== "");
@@ -361,39 +433,6 @@ function updateBestTimeDisplay() {
     } else display.textContent = `🏆 Récord: --:--`;
 }
 
-function saveProgress(){
-    if(gameOver) return;
-    const cellsData = Array.from(document.querySelectorAll(".cell")).map(cell => {
-        const input = cell.querySelector('.main-num');
-        const notesLayer = cell.querySelector('.notes-layer');
-        if(!input) return null;
-        return { v: input.value, n: notesLayer.getAttribute('data-notes') || '', d: input.disabled, e: input.classList.contains("error") };
-    }).filter(x => x !== null);
-    localStorage.setItem("hyde_v6", JSON.stringify({ cellsData, solution, puzzle, lives, hintsRemaining, totalSeconds, diff: document.getElementById("difficulty").value }));
-}
-
-function loadProgress(){
-    const saved = localStorage.getItem("hyde_v6");
-    if(!saved) return newGame();
-    const s = JSON.parse(saved);
-    solution = s.solution; puzzle = s.puzzle; lives = s.lives; hintsRemaining = s.hintsRemaining; totalSeconds = s.totalSeconds;
-    document.getElementById("difficulty").value = s.diff;
-    drawBoard(s.cellsData.map(c => c.d));
-    const inputs = document.querySelectorAll(".main-num");
-    const cells = document.querySelectorAll(".cell");
-    s.cellsData.forEach((data, i) => {
-        inputs[i].value = data.v; inputs[i].setAttribute('value', data.v);
-        if(data.e) inputs[i].classList.add("error");
-        if(data.n) {
-            const layer = cells[i].querySelector('.notes-layer');
-            layer.setAttribute('data-notes', data.n);
-            const notesArr = data.n.split(",");
-            layer.querySelectorAll('span').forEach((span, idx) => span.textContent = notesArr.includes(String(idx + 1)) ? (idx + 1) : "");
-        }
-    });
-    updateStatusUI(); startTimer(true); createNumPad(); refreshBanner();
-}
-
 function getHint() {
     if(gameOver || hintsRemaining <= 0 || isPaused) return;
     const inputs = Array.from(document.querySelectorAll(".main-num"));
@@ -419,46 +458,7 @@ function startTimer(resume = false){
 }
 
 function confirmNewGame() {
-    if (confirm("¿Empezar de nuevo? Se perderá el progreso.")) newGame();
-}
-
-function newGame(){
-  localStorage.removeItem("hyde_v6");
-  lives = 3; hintsRemaining = 3; gameOver = false; isPaused = false; history = [];
-  document.getElementById("revive-modal").style.display = "none";
-  const diff = document.getElementById("difficulty").value;
-  solution = generateSolvedBoard(); puzzle = createPuzzle(solution, diff);
-  drawBoard(puzzle.flat().map(v => v !== 0));
-  updateStatusUI(); startTimer(); saveProgress(); refreshBanner();
-}
-
-function updateVisualSelection(target){
-  document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight-area', 'selected', 'same-number'));
-  if(!target) return;
-  const all = Array.from(document.querySelectorAll(".main-num"));
-  const idx = all.indexOf(target);
-  const r=Math.floor(idx/9), c=idx%9;
-  all.forEach((el, i)=>{
-    const ir=Math.floor(i/9), ic=i%9;
-    if(ir===r || ic===c || (Math.floor(ir/3)===Math.floor(r/3) && Math.floor(ic/3)===Math.floor(c/3))) el.parentElement.classList.add('highlight-area');
-    if(el===target) el.parentElement.classList.add('selected');
-    if(target.value && el.value === target.value && el !== target) el.parentElement.classList.add('same-number');
-  });
-}
-
-function undo() {
-    if (history.length === 0 || gameOver || isPaused) return;
-    const last = history.pop();
-    const cells = document.querySelectorAll(".cell");
-    const target = cells[last.idx].querySelector(".main-num");
-    const layer = cells[last.idx].querySelector(".notes-layer");
-    target.value = last.oldValue; target.setAttribute('value', last.oldValue);
-    layer.setAttribute('data-notes', last.oldNotes);
-    const notesArr = last.oldNotes.split(",");
-    layer.querySelectorAll('span').forEach((s, i) => s.textContent = notesArr.includes(String(i+1)) ? i+1 : '');
-    const r = Math.floor(last.idx/9), c = last.idx%9;
-    target.classList.toggle("error", target.value && parseInt(target.value) !== solution[r][c]);
-    createNumPad(); saveProgress();
+    if (confirm("¿Empezar de nuevo?")) newGame();
 }
 
 function checkWin(){
@@ -476,27 +476,14 @@ function checkWin(){
   }
 }
 
-function toggleTheme(){
-    document.body.classList.remove(...themes);
-    currentThemeIdx = (currentThemeIdx + 1) % themes.length;
-    document.body.classList.add(themes[currentThemeIdx]);
-}
+function toggleNoteMode(){ noteMode=!noteMode; document.getElementById("note-btn").classList.toggle('active', noteMode); document.getElementById("note-btn").textContent = `Notas: ${noteMode ? 'ON' : 'OFF'}`; }
 
 document.addEventListener('click', e => {
   if(e.target.classList.contains('main-num')){ selectedInput = e.target; updateVisualSelection(selectedInput); }
   else if (!e.target.closest('#num-pad') && !e.target.closest('.controls')) { selectedInput = null; updateVisualSelection(null); }
 });
 
-document.addEventListener('keydown', (e) => {
-    if (gameOver || isPaused || !selectedInput) return;
-    if (e.key >= '1' && e.key <= '9') insertNumber(parseInt(e.key));
-    else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') insertNumber(0);
-    else if (e.key.toLowerCase() === 'n') toggleNoteMode();
-});
-
 window.onload = loadProgress;
 </script>
 </body>
-
 </html>
-
