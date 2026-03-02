@@ -12,68 +12,61 @@
   --highlight: rgba(59, 130, 246, 0.15);
   --selected: rgba(59, 130, 246, 0.4);
   --same-num: rgba(245, 158, 11, 0.25);
-  --hint: #f59e0b;
 }
 body.light {
   --bg: #f3f4f6; --panel: #ffffff; --cell: #e5e7eb; --text: #111827;
   --accent: #2563eb; --error: #dc2626; --border: #9ca3af;
 }
-body.sepia {
-  --bg: #f4ecd8; --panel: #fdf6e3; --cell: #eee8d5; --text: #586e75;
-  --accent: #b58900; --error: #d33682; --border: #93a1a1;
-}
-
 body { 
     margin:0; font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); 
     display:flex; flex-direction:column; align-items:center; min-height: 100vh; 
-    padding-bottom: 80px; /* Espacio para el banner */
-    transition: 0.3s; overflow-x: hidden;
+    padding-bottom: 90px; transition: 0.3s; overflow-x: hidden;
 }
-
 h1 { margin:15px 0; font-size: 1.2rem; text-align: center; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-
-.status-bar { display: flex; gap: 15px; margin-bottom: 10px; font-weight: 600; font-size: 0.85rem; align-items: center; justify-content: center; width: 100%; max-width: 450px; }
-
+.status-bar { display: flex; gap: 20px; margin-bottom: 10px; font-weight: 600; font-size: 0.9rem; }
 #sudoku-grid { 
   display:grid; grid-template-columns:repeat(9,1fr); 
   width:95vw; max-width:450px; aspect-ratio:1/1; 
   background:var(--border); border: 4px solid var(--border); 
   border-radius:8px; overflow:hidden; position: relative;
 }
-
-.cell { position:relative; background:var(--cell); border:0.5px solid var(--border); }
+.cell { position:relative; background:var(--cell); border:0.5px solid var(--border); transition: 0.2s; }
 .cell.block-shaded { background-color: var(--panel); }
-.cell:nth-child(3n) { border-right: 3px solid var(--border); }
-.cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 3px solid var(--border); }
+.cell.selected { outline: 3px solid var(--accent); z-index: 10; transform: scale(1.02); }
+.cell.highlight-area::after { content:''; position:absolute; inset:0; background: var(--highlight); pointer-events:none; }
+.cell.same-number::after { content:''; position:absolute; inset:0; background: var(--same-num); pointer-events:none; }
+
+@keyframes undo-flash { 0% { background-color: var(--accent); } 100% { background-color: var(--cell); } }
+.cell.undo-effect { animation: undo-flash 0.4s ease-out; }
 
 .cell .main-num { 
   width:100%; height:100%; text-align:center; font-size:1.8rem; border:none; outline:none; 
   background:transparent; color:var(--text); font-weight:600; cursor: pointer; position: relative; z-index: 2;
 }
 .cell .main-num:disabled { color:var(--accent); font-weight:800; }
-.cell .main-num.error { color: var(--error); }
+.cell .main-num.error { color: var(--error); animation: shake 0.3s; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
 .cell .notes-layer { display:grid; grid-template-columns:repeat(3,1fr); position:absolute; inset:0; pointer-events:none; padding: 2px; }
 .cell .notes-layer span { display:flex; align-items:center; justify-content:center; font-size:0.55rem; opacity:0.7; color: var(--text); }
 
 .controls { margin:10px 0; display:flex; gap:5px; flex-wrap:wrap; justify-content:center; }
 button, select { padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+#note-btn.active { background: var(--success); color: white; }
 
 #num-pad { display: flex; flex-direction: row; justify-content: space-between; width: 95vw; max-width: 480px; margin: 15px 0; gap: 6px; }
-#num-pad button { flex: 1; padding: 15px 0; border-radius: 8px; font-size: 1.2rem; background: var(--panel); color: var(--text); }
+#num-pad button { flex: 1; padding: 12px 0; border-radius: 8px; font-size: 1.1rem; background: var(--panel); color: var(--text); display: flex; flex-direction: column; align-items: center; }
+#num-pad button span { font-size: 0.6rem; opacity: 0.6; margin-top: 2px; }
+#num-pad button.completed { opacity: 0.2; pointer-events: none; }
 
-#ad-banner-container {
-    position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
-    background: var(--panel); border-top: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center; z-index: 1000;
-}
-#ad-placeholder { width: 320px; height: 50px; background: rgba(0,0,0,0.2); border-radius: 4px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text); opacity: 0.5; }
+#ad-banner-container { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: var(--panel); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+#ad-placeholder { width: 320px; height: 50px; background: rgba(0,0,0,0.1); border: 1px dashed var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text); opacity: 0.5; }
 </style>
 </head>
 <body>
 
 <h1>El reto de Mr. Hyde: Sudoku gratis en Español</h1>
-
+<div id="best-time-display" style="font-size: 0.75rem; margin-bottom: 5px; color: var(--success);">🏆 Mejor: --:--</div>
 <div class="status-bar">
     <div id="lives-container">❤️❤️❤️</div>
     <div id="timer">00:00</div>
@@ -87,27 +80,64 @@ button, select { padding: 8px 12px; border-radius: 8px; border: none; font-weigh
     <option value="dificil">Difícil</option>
   </select>
   <button onclick="confirmNewGame()">Nuevo</button>
-  <button onclick="undo()">↶</button>
+  <button onclick="undo()">↶ Deshacer</button>
   <button id="hint-btn" onclick="getHint()">Pista</button>
   <button id="note-btn" onclick="toggleNoteMode()">Notas: OFF</button>
   <button onclick="toggleTheme()">🌓 Tema</button>
 </div>
 
 <div id="sudoku-grid"></div>
-
 <div id="num-pad"></div>
 
 <div id="ad-banner-container">
-    <div id="ad-placeholder">
-        <span>ESPACIO PARA PUBLICIDAD</span>
-    </div>
+    <div id="ad-placeholder"><span>ESPACIO PARA PUBLICIDAD</span></div>
 </div>
 
 <script>
-// Lógica de juego restaurada a su estado funcional anterior
 let solution=[], puzzle=[], timerInterval, selectedInput=null, noteMode=false;
 let history = [], lives = 3, hintsRemaining = 3, gameOver = false, totalSeconds = 0;
 
+// --- SINTETIZADOR DE SONIDO ---
+function playErrorSound() {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(150, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+}
+
+// --- PERSISTENCIA ---
+function saveProgress() {
+    if(gameOver) return;
+    const cellsData = Array.from(document.querySelectorAll(".cell")).map(cell => {
+        const input = cell.querySelector('.main-num');
+        const notes = Array.from(cell.querySelectorAll('.notes-layer span')).map(s => s.textContent);
+        return { val: input.value, isFixed: input.disabled, isError: input.classList.contains('error'), notes: notes };
+    });
+    const state = { solution, puzzle, lives, hintsRemaining, totalSeconds, cellsData, diff: document.getElementById("difficulty").value };
+    localStorage.setItem("hyde_sudoku_pro_v3", JSON.stringify(state));
+}
+
+function loadProgress() {
+    const saved = localStorage.getItem("hyde_sudoku_pro_v3");
+    if(!saved) return newGame();
+    const s = JSON.parse(saved);
+    solution = s.solution; puzzle = s.puzzle; lives = s.lives; 
+    hintsRemaining = s.hintsRemaining; totalSeconds = s.totalSeconds;
+    document.getElementById("difficulty").value = s.diff;
+    drawBoard(true, s.cellsData);
+    updateStatusUI();
+    startTimer(true);
+}
+
+// --- LÓGICA DE TABLERO ---
 function generateSolvedBoard(){
   const board=Array.from({length:9},()=>Array(9).fill(0));
   const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
@@ -137,77 +167,203 @@ function createPuzzle(board, diff){
   return p;
 }
 
-function drawBoard(){
+function drawBoard(isLoad = false, loadedData = null){
   const grid=document.getElementById("sudoku-grid"); grid.innerHTML = "";
   for(let r=0;r<9;r++){
     for(let c=0;c<9;c++){
       const cell=document.createElement("div"); cell.classList.add("cell");
       if ((Math.floor(r/3)*3 + Math.floor(c/3)) % 2 === 0) cell.classList.add("block-shaded");
       const input=document.createElement("input"); input.classList.add("main-num"); input.readOnly=true;
-      if(puzzle[r][c] !== 0){ input.value = puzzle[r][c]; input.disabled=true; }
       const notesLayer=document.createElement("div"); notesLayer.classList.add("notes-layer");
       for(let i=0; i<9; i++) notesLayer.appendChild(document.createElement("span"));
+      if(isLoad) {
+          const d = loadedData[r*9+c];
+          input.value = d.val;
+          if(d.isFixed) input.disabled = true;
+          if(d.isError) input.classList.add("error");
+          d.notes.forEach((n, i) => notesLayer.querySelectorAll('span')[i].textContent = n);
+      } else if(puzzle[r][c] !== 0){
+          input.value = puzzle[r][c]; input.disabled=true;
+      }
       cell.append(input, notesLayer); grid.appendChild(cell);
     }
   }
   createNumPad();
 }
 
-function insertNumber(num){
-  if(!selectedInput || selectedInput.disabled || gameOver) return;
+// --- ACCIONES ---
+function insertNumber(num) {
+  if (!selectedInput || selectedInput.disabled || gameOver) return;
+  const cell = selectedInput.parentElement;
+  const notesLayer = cell.querySelector('.notes-layer');
   const idx = Array.from(document.querySelectorAll(".main-num")).indexOf(selectedInput);
-  const r = Math.floor(idx/9), c = idx%9;
+  const r = Math.floor(idx / 9), c = idx % 9;
 
-  if(noteMode && num !== 0) {
-      const spans = selectedInput.parentElement.querySelectorAll('.notes-layer span');
-      spans[num-1].textContent = spans[num-1].textContent ? "" : num;
-      return;
-  }
+  // Registro en historial (SIN GUARDAR VIDAS)
+  const currentNotes = Array.from(notesLayer.querySelectorAll('span')).map(s => s.textContent).join(',');
+  history.push({
+    idx: idx,
+    oldValue: selectedInput.value,
+    oldNotes: currentNotes,
+    wasError: selectedInput.classList.contains('error')
+  });
+  if (history.length > 50) history.shift();
 
-  selectedInput.value = num === 0 ? "" : num;
-  if(num !== 0 && num !== solution[r][c]) {
-      selectedInput.classList.add("error");
-      lives--;
-      updateStatusUI();
-      if(lives <= 0) { alert("Game Over"); newGame(); }
+  if (noteMode && num !== 0) {
+    const spans = notesLayer.querySelectorAll('span');
+    spans[num - 1].textContent = spans[num - 1].textContent ? "" : num;
   } else {
+    selectedInput.value = num === 0 ? "" : num;
+    if (num !== 0 && num !== solution[r][c]) {
+      selectedInput.classList.add("error");
+      lives--; 
+      playErrorSound(); // <-- Sonido de error
+      updateStatusUI();
+      if (lives <= 0) { alert("¡Se acabaron las vidas!"); newGame(); return; }
+    } else {
       selectedInput.classList.remove("error");
       checkWin();
+    }
+    notesLayer.querySelectorAll('span').forEach(s => s.textContent = "");
   }
+  updateVisualSelection(selectedInput);
+  createNumPad();
+  saveProgress();
 }
 
-function updateStatusUI() {
-    document.getElementById("lives-container").textContent = "❤️".repeat(lives);
-    document.getElementById("hint-count-display").textContent = `💡 ${hintsRemaining}/3`;
+function undo() {
+  if (history.length === 0 || gameOver) return;
+  const lastMove = history.pop();
+  const allCells = document.querySelectorAll(".cell");
+  const cell = allCells[lastMove.idx];
+  const input = cell.querySelector(".main-num");
+  const notesLayer = cell.querySelector(".notes-layer");
+
+  cell.classList.add('undo-effect');
+  setTimeout(() => cell.classList.remove('undo-effect'), 400);
+
+  input.value = lastMove.oldValue;
+  if (lastMove.wasError) input.classList.add("error");
+  else input.classList.remove("error");
+
+  // No restauramos 'lives', se quedan como estén
+  const savedNotes = lastMove.oldNotes.split(',');
+  const spans = notesLayer.querySelectorAll('span');
+  spans.forEach((span, i) => { span.textContent = savedNotes[i] || ""; });
+
+  selectedInput = input;
+  updateVisualSelection(input);
+  createNumPad();
+  saveProgress();
+}
+
+// --- UI HELPERS ---
+function updateVisualSelection(target){
+  document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight-area', 'selected', 'same-number'));
+  if(!target) return;
+  const all = Array.from(document.querySelectorAll(".main-num"));
+  const idx = all.indexOf(target);
+  const r=Math.floor(idx/9), c=idx%9;
+  all.forEach((el, i)=>{
+    const ir=Math.floor(i/9), ic=i%9;
+    if(ir===r || ic===c || (Math.floor(ir/3)===Math.floor(r/3) && Math.floor(ic/3)===Math.floor(c/3))) 
+        el.parentElement.classList.add('highlight-area');
+    if(target.value && el.value === target.value) el.parentElement.classList.add('same-number');
+  });
+  target.parentElement.classList.add('selected');
 }
 
 function createNumPad() {
     const pad = document.getElementById("num-pad"); pad.innerHTML = "";
+    const counts = Array(10).fill(0);
+    document.querySelectorAll(".main-num").forEach(i => { if(i.value && !i.classList.contains('error')) counts[i.value]++; });
     for(let i=1; i<=9; i++) {
         const btn = document.createElement("button");
-        btn.textContent = i;
+        btn.innerHTML = `${i} <span>${counts[i]}/9</span>`;
+        if(counts[i] >= 9) btn.classList.add("completed");
         btn.onclick = () => insertNumber(i);
         pad.appendChild(btn);
     }
+    const del = document.createElement("button");
+    del.innerHTML = "⌫ <span>Borrar</span>"; del.onclick = () => insertNumber(0);
+    pad.appendChild(del);
+}
+
+function getHint() {
+    if(gameOver || hintsRemaining <= 0) return;
+    const inputs = Array.from(document.querySelectorAll(".main-num"));
+    const empty = inputs.map((el, i) => ({ el, i })).filter(item => !item.el.disabled && (item.el.value === "" || item.el.classList.contains("error")));
+    if (empty.length > 0) {
+        hintsRemaining--; updateStatusUI();
+        const item = empty[Math.floor(Math.random()*empty.length)];
+        selectedInput = item.el;
+        insertNumber(solution[Math.floor(item.i/9)][item.i%9]);
+    }
+}
+
+function startTimer(resume = false){
+    if(!resume) totalSeconds = 0;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        totalSeconds++;
+        const m = String(Math.floor(totalSeconds/60)).padStart(2,'0');
+        const s = String(totalSeconds%60).padStart(2,'0');
+        document.getElementById("timer").textContent = `${m}:${s}`;
+    }, 1000);
+}
+
+function updateStatusUI() {
+    document.getElementById("lives-container").textContent = "❤️".repeat(Math.max(0, lives)) + "🖤".repeat(Math.max(0, 3 - lives));
+    document.getElementById("hint-count-display").textContent = `💡 ${hintsRemaining}/3`;
+    updateBestTimeDisplay();
+}
+
+function updateBestTimeDisplay() {
+    const diff = document.getElementById("difficulty").value;
+    const record = localStorage.getItem(`best_time_${diff}`);
+    const display = document.getElementById("best-time-display");
+    if(record) {
+        const m = String(Math.floor(record/60)).padStart(2,'0');
+        const s = String(record%60).padStart(2,'0');
+        display.textContent = `🏆 Mejor: ${m}:${s}`;
+    } else display.textContent = `🏆 Mejor: --:--`;
+}
+
+function checkWin(){
+  const inputs = Array.from(document.querySelectorAll(".main-num"));
+  if(inputs.every(i => i.value && !i.classList.contains('error'))) {
+      gameOver = true; clearInterval(timerInterval);
+      const diff = document.getElementById("difficulty").value;
+      const prevRecord = localStorage.getItem(`best_time_${diff}`);
+      if(!prevRecord || totalSeconds < prevRecord) {
+          localStorage.setItem(`best_time_${diff}`, totalSeconds);
+          alert("¡NUEVO RÉCORD!");
+      } else alert("¡Victoria!");
+      localStorage.removeItem("hyde_sudoku_pro_v3");
+  }
 }
 
 function newGame(){
-  lives = 3; hintsRemaining = 3; gameOver = false;
+  history = []; lives = 3; hintsRemaining = 3; gameOver = false;
   const diff = document.getElementById("difficulty").value;
   solution = generateSolvedBoard(); puzzle = createPuzzle(solution, diff);
-  drawBoard(); updateStatusUI();
+  drawBoard(); updateStatusUI(); startTimer(); saveProgress();
 }
 
 function toggleTheme(){ document.body.classList.toggle("light"); }
-function toggleNoteMode(){ noteMode=!noteMode; document.getElementById("note-btn").textContent = `Notas: ${noteMode?'ON':'OFF'}`; }
+function toggleNoteMode(){ noteMode=!noteMode; document.getElementById("note-btn").classList.toggle('active', noteMode); document.getElementById("note-btn").textContent = `Notas: ${noteMode?'ON':'OFF'}`; }
 
 document.addEventListener('click', e => {
-  if(e.target.classList.contains('main-num')) selectedInput = e.target;
+  if(e.target.classList.contains('main-num')) {
+      selectedInput = e.target; updateVisualSelection(selectedInput);
+  } else if(!e.target.closest('#num-pad') && !e.target.closest('.controls')) {
+      selectedInput = null; updateVisualSelection(null);
+  }
 });
 
-function confirmNewGame() { if(confirm("¿Nuevo juego?")) newGame(); }
+function confirmNewGame() { if(confirm("¿Nuevo juego? Se perderá el progreso.")) newGame(); }
 
-window.onload = newGame;
+window.onload = loadProgress;
 </script>
 </body>
 </html>
